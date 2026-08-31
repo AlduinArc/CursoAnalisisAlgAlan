@@ -21,6 +21,21 @@ Entre los principales objetivos se encuentran:
 3. Medir tiempos de ejecución.
 4. Documentar los resultados de los laboratorios.
 
+## Ejemplo de código
+
+```python
+def suma(a, b):
+    return a + b
+
+resultado = suma(5, 3)
+print(resultado)
+```
+
 ## Control de versiones
 
 Los avances del proyecto serán registrados mediante commits descriptivos y sincronizados periódicamente con el repositorio remoto en GitHub.
+
+## Autor
+
+- Nombre: Alan
+- Correo: alanarias321704@correo.itm.edu.co
