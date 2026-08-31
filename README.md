@@ -39,3 +39,4 @@ Los avances del proyecto serán registrados mediante commits descriptivos y sinc
 
 - Nombre: Alan
 - Correo: alanarias321704@correo.itm.edu.co
+- Semestre: 2026-2
