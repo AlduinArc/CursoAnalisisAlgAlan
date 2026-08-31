@@ -1,3 +1,7 @@
 __pycache__/
-.vscode/
 *.pyc
+.vscode/
+venv/
+.venv/
+matplotlib==3.9.2
+numpy==2.1.1
