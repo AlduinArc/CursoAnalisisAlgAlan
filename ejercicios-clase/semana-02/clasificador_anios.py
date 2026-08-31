@@ -42,15 +42,27 @@ def leer_anios() -> list[int]:
 
         try:
             anios = [int(anio.strip()) for anio in entrada.split(",")]
+
+            if any(anio < 0 for anio in anios):
+                raise ValueError("Los años no pueden ser negativos.")
+
             return anios
-        except ValueError:
-            print("Entrada inválida. Ingrese solamente números separados por comas.")
+
+        except ValueError as error:
+            print(f"Entrada inválida: {error}")
 
 
 def main() -> None:
     """Punto de entrada del script."""
     anios = leer_anios()
     anios_bisiestos = [anio for anio in anios if es_bisiesto(anio)]
+
+    decadas = {anio // 10 * 10 for anio in anios}
+
+    anios_por_decada = {
+        decada: [anio for anio in anios if anio // 10 * 10 == decada]
+        for decada in decadas
+    }
 
     print()
     print(f"Años ingresados: {anios}")
@@ -59,6 +71,7 @@ def main() -> None:
         f"Cantidad de años bisiestos: "
         f"{len(anios_bisiestos)} de {len(anios)}"
     )
+    print(f"Años agrupados por década: {anios_por_decada}")
 
 
 if __name__ == "__main__":
