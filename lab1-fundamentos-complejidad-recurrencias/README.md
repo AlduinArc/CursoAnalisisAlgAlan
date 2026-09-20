@@ -308,7 +308,7 @@ Las mediciones utilizan `time.perf_counter()` y los algoritmos implementados man
 # 6. Estructura del laboratorio
 
 La estructura final nos deberia quedar algo asi:
-
+```
 lab1-fundamentos-complejidad-recurrencias/
 ├── README.md
 ├── algoritmos.py
@@ -319,4 +319,5 @@ lab1-fundamentos-complejidad-recurrencias/
     ├── parte3_comparaciones.png
     ├── parte3_tiempo.png
     └── parte4_tiempo.png
+```
 
