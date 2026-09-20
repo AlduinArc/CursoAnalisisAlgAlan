@@ -13,7 +13,7 @@ from datos import (
 )
 
 
-TAMANOS = [100, 200, 400, 800, 1600, 3200, 6400]
+TAMANOS = [100, 300, 500, 700, 1400, 3500, 6000]
 
 
 def medir_escenario(
