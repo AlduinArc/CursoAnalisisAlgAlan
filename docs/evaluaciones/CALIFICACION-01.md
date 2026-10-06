@@ -9,11 +9,11 @@
 |---|---|
 | Corrección conceptual | 16 / 25 |
 | Calidad de la explicación teórica | 17 / 25 |
-| Corrección de la implementación | 16 / 20 |
+| Corrección de la implementación | 17 / 20 |
 | Calidad del análisis de las gráficas | 15 / 20 |
 | Documentación y organización del informe | 9 / 10 |
-| **Total** | **73 / 100** |
-| **Nota (0–5)** | **3.65** |
+| **Total** | **74 / 100** |
+| **Nota (0–5)** | **3.70** |
 
 ## 1. Corrección conceptual (16 / 25)
 **Lo que hizo bien:**
@@ -37,7 +37,7 @@
 - El cálculo de insertion sort no es "línea a línea": solo cuenta comparaciones. Faltó indicar cuántas veces se ejecuta cada línea del código y sumar sus costos.
 - La tabla del escenario A en la Parte 3.2 tiene casillas de comparaciones vacías ("—").
 
-## 3. Corrección de la implementación (16 / 20)
+## 3. Corrección de la implementación (17 / 20)
 **Lo que hizo bien:**
 - `insertion_sort` y `merge_sort` ordenan bien, no cambian la lista original y cuentan las comparaciones entre elementos (el conteo da n − 1 en una lista ya ordenada). No usan `sorted()` ni `sort()`.
 - `merge_sort` tiene su propia mezcla recursiva. Los generadores dan listas del tamaño pedido, sin repetidos y con semilla.
@@ -45,7 +45,6 @@
 **Lo que puede mejorar:**
 - En `generar_inverso` el texto de ayuda quedó mal armado (la parte de "Returns" quedó pegada a "Args").
 - Algunos parámetros (`generador`, `algoritmo`) no tienen tipo, y se usó `__import__("math")` en lugar de un import normal.
-- Los cuatro archivos `.py` terminan sin salto de línea final.
 
 ## 4. Calidad del análisis de las gráficas (15 / 20)
 **Lo que hizo bien:**
