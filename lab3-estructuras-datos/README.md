@@ -4,539 +4,455 @@
 
 ---
 
-# Reproducción del experimento
+## Reproducción del proyecto
 
-El laboratorio fue desarrollado utilizando **Python 3**. Para reproducir las pruebas funcionales y las mediciones experimentales se debe ingresar a la carpeta del proyecto, crear y activar un entorno virtual e instalar la dependencia utilizada para generar las gráficas.
+El proyecto implementa y compara dos estructuras para almacenar y buscar envíos de una empresa ficticia de mensajería: una **lista enlazada** y una **tabla hash**.
 
-## 1. Crear el entorno virtual
+La estructura del proyecto es:
 
-### Windows
+```text
+laboratorio-hash/
+├── estructuras.py
+├── pruebas.py
+├── medicion.py
+├── README.md
+└── graficas/
+    ├── lista_vs_tabla.png
+    └── tiempo_vs_alfa.png
+```
+
+### 1. Crear el entorno virtual
+
+En Windows:
 
 ```bash
 python -m venv .venv
 .venv\Scripts\activate
 ```
 
-### Linux / macOS
+En Linux o macOS:
 
 ```bash
 python3 -m venv .venv
 source .venv/bin/activate
 ```
 
-## 2. Instalar la dependencia
-
-Con el entorno virtual activado:
+### 2. Instalar las dependencias
 
 ```bash
 pip install matplotlib
 ```
 
-## 3. Ejecutar las pruebas
-
-Las pruebas de la Parte 1 se ejecutan mediante:
+### 3. Ejecutar las pruebas
 
 ```bash
 python pruebas.py
 ```
 
-Si todas las pruebas son correctas, se muestra:
+Al finalizar correctamente, debe aparecer:
 
 ```text
 Todas las pruebas finalizaron correctamente.
 ```
 
-## 4. Ejecutar las mediciones
-
-Los experimentos de la Parte 2 y la generación de las dos gráficas se ejecutan mediante:
+### 4. Ejecutar las mediciones
 
 ```bash
 python medicion.py
 ```
 
-El programa genera:
+El programa realiza las mediciones de rendimiento y genera las siguientes imágenes dentro de la carpeta `graficas/`:
 
-```text
-graficas/
-├── lista_vs_tabla.png
-└── tiempo_vs_alfa.png
-```
-
-Los datos aleatorios se generan utilizando una semilla fija (`2026`) para facilitar la reproducción del experimento.
+- `graficas/lista_vs_tabla.png`
+- `graficas/tiempo_vs_alfa.png`
 
 ---
 
-# Parte 1 — Implementación y verificación de las estructuras
+# Parte 1 — Implementación y pruebas
 
-**Código de las estructuras:** [estructuras.py](estructuras.py)  
+**Código de las estructuras:** [estructuras.py](estructuras.py)
+
 **Código de las pruebas:** [pruebas.py](pruebas.py)
 
-Se implementaron tres componentes principales:
+La implementación contiene dos estructuras principales para almacenar pares `clave-valor`: una lista enlazada y una tabla hash.
 
-- `Nodo`: representa cada elemento de una lista enlazada.
-- `ListaEnlazada`: almacena los códigos de guía mediante nodos enlazados.
-- `TablaHash`: utiliza una tabla de casillas y una lista enlazada en cada casilla para resolver colisiones mediante **encadenamiento separado**.
+## Lista enlazada
 
-La función hash utilizada es la función de división:
+La clase `Nodo` representa cada elemento de la lista. Cada nodo contiene:
 
-\[
-h(k)=k\bmod m
-\]
+- una clave entera;
+- un valor de tipo texto;
+- una referencia al siguiente nodo.
 
-donde \(k\) es el código de guía y \(m\) es el número de casillas de la tabla.
+La clase `ListaEnlazada` mantiene una referencia a su cabeza y un contador de elementos.
 
-## Casos verificados
+La operación `insertar` primero recorre la lista para comprobar si la clave ya existe. Si encuentra la clave, actualiza su valor. Si no la encuentra, crea un nuevo nodo y lo coloca al inicio de la lista.
 
-Las pruebas cubren:
+Por esta razón, aunque insertar físicamente al inicio cuesta tiempo constante, la operación completa puede necesitar recorrer la lista para comprobar duplicados.
 
-1. Creación de nodos.
-2. Inserción en la lista enlazada.
-3. Búsqueda exitosa en la lista.
-4. Búsqueda no exitosa en la lista.
-5. Inserción en la tabla hash.
-6. Búsqueda exitosa en la tabla hash.
-7. Búsqueda no exitosa en la tabla hash.
-8. Verificación del tamaño de las estructuras.
-9. Cálculo del factor de carga.
-10. Manejo de colisiones mediante encadenamiento.
-11. Comparación de los resultados de la lista y la tabla hash sobre colecciones aleatorias.
+La operación `buscar` recorre los nodos desde la cabeza hasta encontrar la clave solicitada o llegar al final de la estructura.
 
-### Colisión controlada
+## Tabla hash
 
-Para comprobar directamente el manejo de colisiones se utilizó una tabla con:
+La clase `TablaHash` utiliza un arreglo de cubetas. Cada cubeta contiene una instancia de `ListaEnlazada`.
 
-\[
-m=7
-\]
+La posición de una clave se obtiene mediante el método de división:
 
-y las claves:
+```text
+indice = clave % capacidad
+```
 
-\[
-10,\;24,\;17
-\]
+Cuando dos claves producen el mismo índice se produce una **colisión**. Las colisiones se resuelven mediante listas enlazadas dentro de cada cubeta.
+
+La tabla también mantiene el número total de elementos almacenados, lo que permite calcular el factor de carga mediante:
+
+```text
+alpha = n / m
+```
+
+donde:
+
+- `n` es el número de elementos almacenados;
+- `m` es la cantidad de cubetas;
+- `alpha` es el factor de carga.
+
+## Verificación realizada
+
+Las pruebas verifican tanto el funcionamiento individual de las estructuras como diferentes situaciones de búsqueda.
+
+Se comprobaron:
+
+1. La creación y funcionamiento de los nodos.
+2. La inserción de elementos en una lista enlazada.
+3. La búsqueda exitosa en una lista.
+4. La búsqueda de claves inexistentes.
+5. La actualización de valores cuando se inserta una clave que ya existe.
+6. La inserción y búsqueda en la tabla hash.
+7. El cálculo del factor de carga.
+8. La longitud de los cajones.
+9. La generación de colisiones controladas.
+10. Colecciones aleatorias para comprobar el comportamiento de las estructuras en diferentes distribuciones de claves.
+
+Para verificar explícitamente el manejo de colisiones se utilizó una tabla con `m = 7` y las claves:
+
+```text
+10, 24, 17
+```
 
 Las tres claves producen el mismo índice:
 
-\[
-10\bmod7=3
-\]
-
-\[
-24\bmod7=3
-\]
-
-\[
-17\bmod7=3
-\]
-
-Por lo tanto, las tres claves se almacenan en la misma casilla:
-
 ```text
-casilla 3 → 10 → 24 → 17 → None
+10 % 7 = 3
+24 % 7 = 3
+17 % 7 = 3
 ```
 
-Las pruebas verifican que las tres claves puedan insertarse y que posteriormente cada una pueda encontrarse correctamente.
+Por tanto, las tres terminan almacenadas en la misma cubeta. Esto permite comprobar que la tabla hash no pierde elementos cuando ocurren colisiones y que la búsqueda puede recorrer correctamente la lista enlazada asociada a dicha cubeta.
 
-### Colecciones aleatorias
+Además, se utilizaron **25 colecciones aleatorias** para comprobar el comportamiento general de las estructuras y realizar búsquedas tanto exitosas como no exitosas.
 
-Además de los casos controlados, se probaron **25 colecciones aleatorias** utilizando una semilla fija.
-
-Para cada colección se realizaron búsquedas de claves presentes y ausentes. Los resultados obtenidos mediante la lista enlazada y la tabla hash se compararon para comprobar que ambas estructuras entregaran la misma respuesta.
-
-Esto permite comprobar no solamente los casos específicos de colisión, sino también el comportamiento de las estructuras sobre diferentes distribuciones de códigos de guía.
+Las pruebas no utilizan `dict`, `set` ni `hash()` para implementar las estructuras principales. La tabla hash se construye explícitamente mediante un arreglo de listas enlazadas y la función de dispersión basada en el método de división.
 
 ---
 
 # Parte 2 — Medición experimental
 
-**Código utilizado para las mediciones:** [medicion.py](medicion.py)
+**Código de medición:** [medicion.py](medicion.py)
 
-Las mediciones se realizaron exclusivamente sobre las operaciones de búsqueda utilizando:
+La medición compara el tiempo de búsqueda de una lista enlazada frente a una tabla hash y estudia además el efecto del factor de carga sobre el rendimiento de la tabla.
 
-```python
-time.perf_counter()
+Para medir el tiempo se utiliza `time.perf_counter()`, adecuado para medir intervalos pequeños de ejecución.
+
+Cada medición realiza **200 búsquedas no exitosas**.
+
+Para disminuir la influencia de variaciones puntuales del sistema, cada configuración se ejecuta **7 veces** y se utiliza la **mediana** de los tiempos obtenidos como resultado representativo.
+
+## Experimento A — Crecimiento con respecto a `n`
+
+En el primer experimento se varía la cantidad de elementos almacenados.
+
+Se utilizaron los siguientes tamaños:
+
+```text
+n = 100
+n = 500
+n = 1000
+n = 5000
+n = 20000
+n = 50000
 ```
 
-La construcción de las estructuras, la generación de los datos y la generación de las gráficas no forman parte del intervalo cronometrado.
+Para la tabla hash se seleccionó un número primo de cubetas cercano a `n / 2`. De esta manera, el factor de carga se mantiene aproximadamente alrededor de:
 
-Para disminuir la influencia del ruido producido por el sistema operativo y otros procesos en segundo plano, cada configuración se ejecutó **7 veces** y se utilizó la **mediana** como resultado representativo.
+```text
+alpha = 2
+```
 
-Cada medición realizó **200 búsquedas no exitosas**.
+Los parámetros utilizados fueron:
 
----
-
-## Experimento A — Lista enlazada frente a tabla hash
-
-Se utilizaron los siguientes tamaños de colección:
-
-\[
-n\in\{100,\;500,\;1000,\;5000,\;20000,\;50000\}
-\]
-
-Para cada valor de \(n\), el tamaño \(m\) de la tabla hash se seleccionó como un número primo cercano a:
-
-\[
-m\approx\frac{n}{2}
-\]
-
-De esta forma se mantuvo un factor de carga aproximadamente igual a:
-
-\[
-\alpha=\frac{n}{m}\approx2
-\]
-
-Los valores utilizados fueron:
-
-| \(n\) | \(m\) | \(\alpha\) aproximado |
+| `n` | `m` | Factor de carga aproximado |
 |---:|---:|---:|
-| 100 | 53 | 1.887 |
-| 500 | 251 | 1.992 |
-| 1.000 | 503 | 1.988 |
-| 5.000 | 2.503 | 1.998 |
-| 20.000 | 10.007 | 1.999 |
-| 50.000 | 25.007 | 2.000 |
+| 100 | 53 | 1.89 |
+| 500 | 251 | 1.99 |
+| 1000 | 503 | 1.99 |
+| 5000 | 2503 | 2.00 |
+| 20000 | 10007 | 2.00 |
+| 50000 | 25007 | 2.00 |
 
-Las búsquedas fueron no exitosas, es decir, se utilizaron códigos que no estaban almacenados en las estructuras.
+Aquí `m` representa la cantidad de cubetas de la tabla hash.
 
-Esta elección permite observar dos comportamientos teóricos diferentes.
+### Resultados gráficos
 
-Para la lista enlazada, una búsqueda no exitosa debe recorrer todos los elementos:
-
-\[
-T_{\text{lista}}(n)=\Theta(n)
-\]
-
-Para la tabla hash con encadenamiento, bajo el supuesto de una distribución aproximadamente uniforme:
-
-\[
-T_{\text{hash}}(n)=\Theta(1+\alpha)
-\]
-
-Como \(\alpha\) se mantiene aproximadamente constante alrededor de 2, el costo esperado de búsqueda de la tabla hash no crece proporcionalmente con \(n\).
-
-### Gráfica
+La siguiente gráfica compara el tiempo de búsqueda de la lista enlazada y la tabla hash:
 
 ![Comparación del tiempo de búsqueda entre lista enlazada y tabla hash](graficas/lista_vs_tabla.png)
 
-La gráfica permite observar la diferencia entre ambas estructuras a medida que aumenta el número de elementos. El crecimiento de la lista está asociado directamente con \(n\), mientras que la tabla hash mantiene un comportamiento mucho más estable debido a que su factor de carga se conserva aproximadamente constante.
+La lista enlazada presenta un crecimiento aproximadamente lineal con respecto a `n`, porque una búsqueda no exitosa puede obligar a recorrer todos sus elementos.
+
+En cambio, la tabla hash mantiene un comportamiento mucho más estable cuando el factor de carga se conserva aproximadamente constante. Aunque existen colisiones, cada búsqueda solamente necesita recorrer el cajón correspondiente.
+
+La diferencia se vuelve más evidente a medida que aumenta el número de elementos. Esto es consistente con las complejidades teóricas:
+
+```text
+Lista enlazada:
+búsqueda promedio/favorable: O(n)
+
+Tabla hash:
+búsqueda esperada: O(1)
+```
+
+En el peor caso, una tabla hash puede llegar a comportarse como una lista enlazada si muchas claves terminan en la misma cubeta:
+
+```text
+Tabla hash, peor caso: O(n)
+```
+
+Por ello, el factor de carga y la distribución de las claves son importantes para el rendimiento.
 
 ---
 
-## Experimento B — Efecto del factor de carga
+## Experimento B — Influencia del factor de carga
 
-En este experimento se mantuvo constante:
+En el segundo experimento se mantuvo constante:
 
-\[
-n=20\,000
-\]
+```text
+n = 20000
+```
 
-y se modificó el tamaño de la tabla para obtener cuatro valores objetivo del factor de carga:
+y se modificó el número de cubetas para obtener diferentes factores de carga.
 
-\[
-\alpha\in\{0.5,\;1,\;4,\;10\}
-\]
+Se realizaron mediciones para valores cercanos a:
 
-El tamaño de la tabla se determinó aproximadamente mediante:
+```text
+alpha = 0.5
+alpha = 1
+alpha = 4
+alpha = 10
+```
 
-\[
-m\approx\frac{n}{\alpha}
-\]
+Los resultados obtenidos fueron:
 
-y se seleccionó un número primo cercano.
-
-Se obtuvieron los siguientes resultados:
-
-| Alfa objetivo | \(m\) (casillas) | Alfa real | Tiempo de búsqueda Hash (μs) |
+| Factor de carga objetivo | `m` | Factor de carga real | Tiempo mediano |
 |---:|---:|---:|---:|
-| 0.500 | 40.009 | 0.500 | 0.127 |
-| 1.000 | 19.997 | 1.000 | 0.144 |
-| 4.000 | 4.999 | 4.001 | 0.256 |
-| 10.000 | 1.999 | 10.005 | 0.509 |
+| 0.5 | 40009 | 0.500 | 0.127 μs |
+| 1 | 19997 | 1.000 | 0.144 μs |
+| 4 | 4999 | 4.001 | 0.256 μs |
+| 10 | 1999 | 10.005 | 0.509 μs |
 
-Los resultados muestran que el tiempo aumenta conforme aumenta el factor de carga.
-
-Entre los extremos del experimento, el tiempo pasó de:
-
-\[
-0.127\ \mu s
-\]
-
-con:
-
-\[
-\alpha=0.500
-\]
-
-a:
-
-\[
-0.509\ \mu s
-\]
-
-con:
-
-\[
-\alpha=10.005
-\]
-
-Por tanto, el tiempo medido en el último caso fue aproximadamente **4.0 veces** el del primer caso.
-
-Esto coincide con la predicción teórica:
-
-\[
-T(\alpha)=\Theta(1+\alpha)
-\]
-
-porque al aumentar \(\alpha\), aumenta la cantidad promedio de elementos almacenados en cada cadena.
-
-El crecimiento no es perfectamente lineal entre los cuatro puntos porque el tiempo medido también contiene constantes de implementación y efectos propios del entorno de ejecución de Python. Sin embargo, la tendencia experimental coincide con el comportamiento esperado.
-
-### Gráfica
+La gráfica correspondiente es:
 
 ![Tiempo de búsqueda de la tabla hash según el factor de carga](graficas/tiempo_vs_alfa.png)
+
+Los resultados muestran una relación clara entre el factor de carga y el tiempo de búsqueda.
+
+Con `alpha = 0.5`, el tiempo mediano fue de `0.127 μs`. Al aumentar el factor de carga hasta aproximadamente `10`, el tiempo aumentó hasta `0.509 μs`.
+
+Por tanto, en estas mediciones el tiempo pasó aproximadamente de `0.127 μs` a `0.509 μs`, es decir, cerca de cuatro veces el valor inicial.
+
+Esto ocurre porque aumentar `alpha` significa almacenar más elementos por cubeta en promedio. Como consecuencia, las listas utilizadas para resolver las colisiones tienden a ser más largas y las búsquedas requieren recorrer más nodos.
+
+Los resultados experimentales permiten observar que la tabla hash no solamente depende de la cantidad total de elementos `n`, sino también de la relación entre `n` y `m`.
 
 ---
 
 # Parte 3 — Análisis
 
-## 1. ¿Cuál es el costo teórico de buscar en una lista enlazada frente a una tabla hash?
+## 1. ¿Cuál es el costo teórico de buscar en una lista enlazada y en una tabla hash?
 
-En una lista enlazada la búsqueda es secuencial. Para una búsqueda no exitosa se deben recorrer todos los elementos, por lo que:
+En una lista enlazada, la búsqueda se realiza secuencialmente. En el peor caso es necesario revisar todos los elementos.
 
-\[
-T_{\text{lista}}(n)=\Theta(n)
-\]
-
-En el peor caso de una búsqueda exitosa también puede ser necesario recorrer prácticamente toda la estructura.
-
-En una tabla hash con encadenamiento, el índice se obtiene directamente mediante:
-
-\[
-h(k)=k\bmod m
-\]
-
-y posteriormente se busca dentro de la cadena correspondiente.
-
-Si las claves se distribuyen aproximadamente de manera uniforme, la longitud esperada de una cadena está relacionada con el factor de carga:
-
-\[
-\alpha=\frac{n}{m}
-\]
-
-Por ello, el costo esperado de una búsqueda es:
-
-\[
-T_{\text{hash}}=\Theta(1+\alpha)
-\]
-
-Si se mantiene \(\alpha=\Theta(1)\), entonces:
-
-\[
-T_{\text{hash}}=\Theta(1)
-\]
-
-Por tanto, para búsquedas exactas por código de guía, la tabla hash presenta una ventaja teórica importante frente a la lista enlazada cuando el número de registros aumenta.
-
----
-
-## 2. ¿Cómo se relacionan los factores de crecimiento teóricos con los tiempos medidos?
-
-El Experimento A mantiene aproximadamente:
-
-\[
-\alpha\approx2
-\]
-
-mientras aumenta \(n\).
-
-Para la lista enlazada, el costo de una búsqueda no exitosa es:
-
-\[
-\Theta(n)
-\]
-
-por lo que duplicar aproximadamente la cantidad de elementos implica aumentar también la cantidad de elementos que deben revisarse.
-
-En la tabla hash, en cambio:
-
-\[
-T_{\text{hash}}=\Theta(1+\alpha)
-\]
-
-y como \(\alpha\) se mantiene aproximadamente constante, la cantidad esperada de elementos revisados dentro de una cadena no crece proporcionalmente con \(n\).
-
-Por eso las dos curvas de la gráfica del Experimento A presentan comportamientos diferentes: la curva de la lista aumenta conforme crece el tamaño de la colección, mientras que la curva de la tabla hash permanece mucho más estable.
-
-La diferencia es especialmente relevante en los tamaños grandes utilizados en el experimento. La interpretación no se basa únicamente en la forma de la gráfica, sino en que los parámetros utilizados mantienen aproximadamente constante el factor de carga y, por tanto, permiten comparar directamente el crecimiento de la lista con el comportamiento esperado de la tabla hash.
-
----
-
-## 3. ¿Por qué las colisiones afectan el rendimiento de una tabla hash?
-
-Una colisión ocurre cuando diferentes claves producen el mismo índice:
-
-\[
-h(k_1)=h(k_2)
-\]
-
-Con el método de encadenamiento, las claves que colisionan se almacenan en una misma lista:
+Por tanto:
 
 ```text
-casilla 3 → k1 → k2 → k3 → None
+Lista enlazada:
+mejor caso: O(1)
+promedio: O(n)
+peor caso: O(n)
 ```
 
-Una búsqueda primero calcula el índice y después debe recorrer la cadena hasta encontrar la clave o determinar que no existe.
+En una tabla hash, primero se calcula la posición correspondiente a la clave mediante la función hash y después se busca dentro del cajón.
 
-Por tanto, si las colisiones aumentan, también aumenta la longitud de las cadenas y el número esperado de comparaciones.
+Si la distribución de las claves es adecuada y el factor de carga se mantiene controlado, el costo esperado es:
 
-El factor de carga permite expresar este comportamiento:
+```text
+Tabla hash:
+esperado: O(1)
+```
 
-\[
-\alpha=\frac{n}{m}
-\]
+Sin embargo, si se producen muchas colisiones, el cajón puede contener una cantidad considerable de elementos. En el peor caso, todos los elementos podrían terminar en la misma cubeta y la búsqueda tendría costo:
 
-Con \(\alpha=0.5\), el experimento obtuvo:
+```text
+peor caso: O(n)
+```
 
-\[
-0.127\ \mu s
-\]
-
-por búsqueda, mientras que con:
-
-\[
-\alpha=10.005
-\]
-
-obtuvo:
-
-\[
-0.509\ \mu s
-\]
-
-Es decir, el tiempo medido aumentó aproximadamente cuatro veces al pasar del menor al mayor factor de carga utilizado.
-
-Esto proporciona evidencia experimental de que una mayor concentración de elementos por casilla incrementa el costo de búsqueda.
+Por esta razón, `O(1)` para una tabla hash debe interpretarse como un costo esperado bajo una distribución adecuada de las claves, no como una garantía absoluta para todos los casos.
 
 ---
 
-## 4. ¿Cuándo sería preferible un árbol de búsqueda binaria?
+## 2. ¿Los resultados experimentales coinciden con el comportamiento teórico?
 
-La tabla hash es especialmente adecuada cuando la operación principal es una búsqueda exacta:
+Sí.
 
-```text
-¿Existe la guía 1234567890?
-```
+La lista enlazada presenta un crecimiento asociado directamente con `n`. Para una búsqueda no exitosa, la estructura debe recorrer todos los nodos antes de determinar que la clave no está presente.
 
-Sin embargo, una tabla hash no mantiene las claves ordenadas.
+La tabla hash, en cambio, distribuye los elementos entre diferentes cubetas. En el Experimento A se mantuvo el factor de carga aproximadamente constante alrededor de `alpha = 2`.
 
-Por ejemplo, una operación como:
+Esto permite que el costo de las búsquedas permanezca mucho más estable al aumentar `n`.
 
-```text
-Mostrar todas las guías entre 1000000000 y 2000000000.
-```
+El Experimento B proporciona una evidencia adicional. Manteniendo `n = 20000`, el tiempo mediano aumentó conforme aumentó `alpha`:
 
-requiere una consulta por rango.
+| `alpha` | Tiempo |
+|---:|---:|
+| 0.5 | 0.127 μs |
+| 1 | 0.144 μs |
+| 4 | 0.256 μs |
+| 10 | 0.509 μs |
 
-En este escenario sería preferible un árbol de búsqueda binaria balanceado, porque mantiene los elementos ordenados y permite buscar en:
+Por ejemplo, al comparar `alpha = 0.5` con `alpha = 10`, el tiempo pasó de `0.127 μs` a `0.509 μs`.
 
-\[
-\Theta(\log n)
-\]
-
-Una consulta de rango puede realizarse en:
-
-\[
-\Theta(\log n+k)
-\]
-
-donde \(k\) es la cantidad de elementos que pertenecen al rango.
-
-Por lo tanto, la selección depende de la operación requerida:
-
-- **Búsqueda exacta por código:** tabla hash.
-- **Consultas por rango:** árbol de búsqueda balanceado.
-- **Recorrido ordenado:** árbol de búsqueda balanceado.
-
-La tabla hash no debe considerarse superior para cualquier tipo de consulta; su principal ventaja está en las búsquedas por igualdad.
+Esto demuestra experimentalmente que una tabla hash puede mantener un comportamiento cercano al esperado `O(1)` cuando las colisiones se encuentran controladas, mientras que un aumento importante del factor de carga incrementa el trabajo necesario para resolver las colisiones.
 
 ---
 
-## 5. ¿Qué ocurriría si Rutas del Caribe tuviera 5.000.000 de envíos?
+## 3. ¿Cómo afectan las colisiones al rendimiento de la tabla hash?
 
-Con una lista enlazada, una búsqueda no exitosa podría recorrer los:
+Las colisiones hacen que varias claves tengan que almacenarse dentro de la misma cubeta.
 
-\[
-5\,000\,000
-\]
+En esta implementación se utiliza una lista enlazada para resolverlas. Por ejemplo, con `m = 7`:
 
-elementos, por lo que su costo seguiría siendo:
+```text
+10 % 7 = 3
+24 % 7 = 3
+17 % 7 = 3
+```
 
-\[
-\Theta(n)
-\]
+Por tanto, las tres claves se almacenan en el cajón `3`.
 
-La tabla hash permite analizar el problema de una manera diferente porque el costo depende del factor de carga:
+Cuando se busca una de ellas, primero se calcula el índice `3` y después se recorre la lista enlazada de ese cajón.
 
-\[
-\alpha=\frac{n}{m}
-\]
+Mientras más elementos se concentren en una misma cubeta, más larga será la búsqueda dentro de ella.
 
-Si se desea mantener:
+Esto se observa en el Experimento B. Con `n = 20000`, aumentar el factor de carga produjo los siguientes resultados:
 
-\[
-\alpha\approx2
-\]
+```text
+alpha = 0.5  -> 0.127 μs
+alpha = 1    -> 0.144 μs
+alpha = 4    -> 0.256 μs
+alpha = 10   -> 0.509 μs
+```
 
-para:
+Por tanto, las colisiones no hacen que la tabla deje de funcionar, pero sí pueden aumentar el tiempo de búsqueda.
 
-\[
-n=5\,000\,000
-\]
+Una buena distribución de las claves y una cantidad adecuada de cubetas permiten reducir este efecto.
 
-se necesita aproximadamente:
+---
 
-\[
-m=\frac{5\,000\,000}{2}=2\,500\,000
-\]
+## 4. ¿Por qué utilizar una tabla hash en lugar de un árbol binario de búsqueda balanceado?
 
-casillas.
+La principal ventaja de la tabla hash para este problema es el costo esperado de búsqueda.
 
-En ese escenario:
+Una tabla hash correctamente dimensionada ofrece:
 
-\[
-T_{\text{hash}}
-=
-\Theta(1+\alpha)
-=
-\Theta(1+2)
-=
-\Theta(1)
-\]
+```text
+Búsqueda esperada: O(1)
+```
 
-Por lo tanto, el crecimiento del número de envíos no implica que una búsqueda deba recorrer proporcionalmente los cinco millones de registros, siempre que la tabla se dimensione para conservar un factor de carga razonable.
+Mientras que un árbol binario de búsqueda balanceado ofrece:
 
-Como contraste, si se mantuviera una tabla de solamente:
+```text
+Búsqueda: O(log n)
+```
 
-\[
-m=200\,000
-\]
+Por lo tanto, si la operación principal del sistema consiste en localizar un envío a partir de una clave exacta, la tabla hash puede ser una alternativa más rápida.
 
-casillas, el factor de carga sería:
+Sin embargo, el árbol balanceado tiene una ventaja importante: mantiene los elementos ordenados.
 
-\[
-\alpha=
-\frac{5\,000\,000}{200\,000}
-=25
-\]
+Esto permite realizar operaciones relacionadas con rangos o sucesores de manera eficiente. Por ejemplo, si se quisiera consultar todos los envíos cuyas claves estuvieran entre dos valores, un árbol balanceado sería más apropiado.
 
-y el costo esperado sería:
+Una tabla hash está diseñada principalmente para búsquedas exactas por clave.
 
-\[
-\Theta(1+25)
-\]
+Por tanto:
 
-Las cadenas serían mucho más largas y el rendimiento disminuiría.
+| Necesidad | Estructura conveniente |
+|---|---|
+| Buscar una clave exacta | Tabla hash |
+| Insertar/buscar por clave exacta | Tabla hash |
+| Mantener elementos ordenados | Árbol balanceado |
+| Consultar rangos de claves | Árbol balanceado |
+| Encontrar sucesor/predecesor | Árbol balanceado |
 
-Por esta razón, para un sistema con cinco millones de envíos no basta con elegir una tabla hash: también es necesario controlar su factor de carga. En una implementación real, esto se resolvería redimensionando la tabla cuando el factor de carga supere un umbral determinado.
+La elección depende entonces de las operaciones que el sistema necesite realizar y no únicamente de cuál estructura tenga la menor complejidad para una operación individual.
 
-La tabla hash sería, por tanto, una buena elección para búsquedas exactas de códigos de guía a gran escala, mientras que para consultas por rangos o que requieran mantener los envíos ordenados sería más conveniente una estructura de búsqueda balanceada.
+---
+
+## 5. La empresa debe almacenar 5.000.000 de envíos. ¿Qué configuración sería conveniente?
+
+Si se mantiene aproximadamente el mismo criterio utilizado en el Experimento A, es decir, un factor de carga cercano a:
+
+```text
+alpha = 2
+```
+
+entonces:
+
+```text
+alpha = n / m
+```
+
+Despejando `m`:
+
+```text
+m = n / alpha
+```
+
+Para:
+
+```text
+n = 5.000.000
+alpha = 2
+```
+
+se obtiene:
+
+```text
+m = 5.000.000 / 2
+m = 2.500.000
+```
+
+Por tanto, sería razonable utilizar aproximadamente **2.500.000 cubetas**, ajustando posteriormente `m` a un valor adecuado para la implementación de la función hash.
+
+La ventaja de esta configuración es que se mantiene una cantidad promedio de aproximadamente dos elementos por cubeta, siguiendo el criterio experimental utilizado anteriormente.
+
+### ¿Qué ocurriría si solamente se utilizaran 200.000 cubetas?
+
+En ese caso:
+
+```text
+n = 5.000.000
+m = 200.000
+```
+
+y el factor de carga sería:
+
+```text
+alpha = 5.000.000 / 200.
