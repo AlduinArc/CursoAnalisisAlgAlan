@@ -11,7 +11,7 @@ El proyecto implementa y compara dos estructuras para almacenar y buscar envíos
 La estructura del proyecto es:
 
 ```text
-laboratorio-hash/
+lab3-estructuras-datos/
 ├── estructuras.py
 ├── pruebas.py
 ├── medicion.py
